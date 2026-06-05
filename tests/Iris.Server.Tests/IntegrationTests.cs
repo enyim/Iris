@@ -23,7 +23,7 @@ public sealed class IntegrationTests : IAsyncLifetime
 
 	private static CancellationToken Timeout => new CancellationTokenSource(TimeSpan.FromSeconds(15)).Token;
 
-	public async Task InitializeAsync()
+	public async ValueTask InitializeAsync()
 	{
 		_debug = DebugServer.Create(o =>
 		{
@@ -36,7 +36,7 @@ public sealed class IntegrationTests : IAsyncLifetime
 		_http = new HttpClient { BaseAddress = BaseHttp };
 	}
 
-	public async Task DisposeAsync()
+	public async ValueTask DisposeAsync()
 	{
 		_http.Dispose();
 		await _debug.StopAsync();

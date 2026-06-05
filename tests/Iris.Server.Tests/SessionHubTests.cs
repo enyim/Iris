@@ -53,7 +53,7 @@ public class SessionHubTests
 			new Runtime.ExecutionContextDescriptionType(
 				new Runtime.ExecutionContextIdType(1), "://", "ctx", "u1"));
 
-		await hub.BroadcastAsync(evt);
+		await hub.BroadcastAsync(evt, Xunit.TestContext.Current.CancellationToken);
 
 		Assert.True(s1.HasPendingOutput(), "s1 should have received the broadcast");
 		Assert.True(s2.HasPendingOutput(), "s2 should have received the broadcast");
@@ -76,7 +76,7 @@ public class SessionHubTests
 			new Runtime.ExecutionContextDescriptionType(
 				new Runtime.ExecutionContextIdType(1), "://", "ctx", "u1"));
 
-		await hub.BroadcastAsync(evt);
+		await hub.BroadcastAsync(evt, Xunit.TestContext.Current.CancellationToken);
 
 		Assert.True(s1.HasPendingOutput(), "s1 (enabled) should receive the event");
 		Assert.False(s2.HasPendingOutput(), "s2 (not enabled) should be gated");
@@ -95,7 +95,7 @@ public class SessionHubTests
 
 		await hub.BroadcastAsync(new Runtime.ExecutionContextCreated(
 			new Runtime.ExecutionContextDescriptionType(
-				new Runtime.ExecutionContextIdType(1), "://", "ctx", "u1")));
+				new Runtime.ExecutionContextIdType(1), "://", "ctx", "u1")), Xunit.TestContext.Current.CancellationToken);
 
 		Assert.False(s1.HasPendingOutput(), "unregistered session should not receive events");
 	}

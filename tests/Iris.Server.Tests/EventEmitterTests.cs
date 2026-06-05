@@ -20,11 +20,11 @@ public class EventEmitterTests
 		var state = new CdpDomainState();
 		var emitter = new CdpEventEmitter(connection, state, CdpContractIndex.Default);
 
-		await emitter.EmitAsync(SampleEvent());
+		await emitter.EmitAsync(SampleEvent(), cancellationToken: Xunit.TestContext.Current.CancellationToken);
 		Assert.Empty(connection.Sent);
 
 		state.Enable("Runtime");
-		await emitter.EmitAsync(SampleEvent());
+		await emitter.EmitAsync(SampleEvent(), cancellationToken: Xunit.TestContext.Current.CancellationToken);
 
 		var message = Assert.IsType<CdpEventMessage>(Assert.Single(connection.Sent));
 		Assert.Equal("Runtime.executionContextCreated", message.Method);
@@ -38,7 +38,7 @@ public class EventEmitterTests
 
 		// Target is not gated (no Target.enable command).
 		await emitter.EmitAsync(new Target.TargetCreated(
-			new Target.TargetInfoType(new Target.TargetIDType("t1"), "page", "", "", true, false)));
+			new Target.TargetInfoType(new Target.TargetIDType("t1"), "page", "", "", true, false)), cancellationToken: Xunit.TestContext.Current.CancellationToken);
 
 		Assert.Single(connection.Sent);
 	}
@@ -51,7 +51,7 @@ public class EventEmitterTests
 		state.Enable("Runtime");
 		var emitter = new CdpEventEmitter(connection, state, CdpContractIndex.Default);
 
-		await emitter.EmitAsync(SampleEvent());
+		await emitter.EmitAsync(SampleEvent(), cancellationToken: Xunit.TestContext.Current.CancellationToken);
 
 		var message = Assert.IsType<CdpEventMessage>(Assert.Single(connection.Sent));
 		Assert.Equal("SES-1", message.SessionId);
