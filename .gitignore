@@ -1,0 +1,13 @@
+*.7z
+generated/
+
+*.suo
+*.user
+
+artifacts/
+[Bb]in/
+[Oo]bj/
+
+.vs/
+**/.DS_Store
+.env

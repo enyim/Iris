@@ -1,0 +1,22 @@
+<Project>
+
+  <PropertyGroup>
+    <RootNamespace>Enyim.Iris</RootNamespace>
+
+    <TargetFramework>net10.0</TargetFramework>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(RootDirectory)artifacts</ArtifactsPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableSourceLink Condition=" '$(EnableSourceLink)' == '' ">false</EnableSourceLink>
+  </PropertyGroup>
+
+</Project>

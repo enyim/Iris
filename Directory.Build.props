@@ -1,0 +1,9 @@
+<Project>
+
+  <PropertyGroup>
+    <RootDirectory>$(MSBuildThisFileDirectory)</RootDirectory>
+  </PropertyGroup>
+
+  <Import Project=".build\Default.props" />
+
+</Project>
