@@ -11,6 +11,7 @@ public interface IInspectionSnapshotStore
 {
 	void SetTree(DebugNode root);
 	DebugNode? CurrentTree { get; }
+	DebugNode GetNodeById(int id);
 }
 
 public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
@@ -26,6 +27,11 @@ public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
 	}
 
 	public DebugNode? CurrentTree => _tree;
+
+	public DebugNode GetNodeById(int id) =>
+		nodesById.TryGetValue(id, out var node)
+			? node
+			: throw new KeyNotFoundException($"Node {id} not found in the current snapshot.");
 
 	static IEnumerable<KeyValuePair<int, DebugNode>> Flatten(DebugNode root)
 	{

@@ -1,6 +1,9 @@
 using ChromeProtocol.Domains;
 
 using Enyim.Iris.Server.Dispatch;
+using Enyim.Iris.Server.Inspection;
+
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Enyim.Iris.Server.AspNetCore;
 
@@ -8,32 +11,13 @@ internal sealed class CssGetComputedStyleForNodeHandler : ICdpCommandHandler<CSS
 {
 	public ValueTask<CSS.GetComputedStyleForNodeRequestResult> HandleAsync(CSS.GetComputedStyleForNodeRequest parameters, CdpCommandContext context)
 	{
-		var attrs = new[]
-		{
-			("display", "block"),
-			("width", "400px"),
-			("height", "200px"),
+		var store = context.Services.GetRequiredService<IInspectionSnapshotStore>();
+		var node = store.GetNodeById(parameters.NodeId.Value);
 
-			("border-left-width", "0px"),
-			("border-top-width", "0px"),
-			("border-bottom-width", "0px"),
-			("border-right-width", "0px"),
+		var props = node.ComputedStyle is { Count: > 0 } style
+			? style.Select(kvp => new CSS.CSSComputedStylePropertyType(kvp.Key, kvp.Value)).ToArray()
+			: [];
 
-			("padding-left", "0px"),
-			("padding-top", "0px"),
-			("padding-bottom", "0px"),
-			("padding-right", "0px"),
-
-			("margin-left", "10px"),
-			("margin-top", "10px"),
-			("margin-bottom", "10px"),
-			("margin-right", "10px"),
-
-			("box-sizing", "content-box"),
-			("position", "static"),
-		};
-
-		return new(new CSS.GetComputedStyleForNodeRequestResult(
-			attrs.Select(a => new CSS.CSSComputedStylePropertyType(a.Item1, a.Item2)).ToArray()));
+		return new(new CSS.GetComputedStyleForNodeRequestResult(props));
 	}
 }
