@@ -1,5 +1,7 @@
 using System.Collections.Frozen;
 
+using Enyim.Iris.Server.Protocol;
+
 namespace Enyim.Iris.Server.Inspection;
 
 /// <summary>
@@ -34,7 +36,7 @@ public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
 	public DebugNode GetNodeById(int id) =>
 		TryGetNodeById(id, out var node)
 			? node
-			: throw new KeyNotFoundException($"Node {id} not found in the current snapshot.");
+			: throw new CdpProtocolException(CdpError.NodeNotFound(id));
 
 	static IEnumerable<KeyValuePair<int, DebugNode>> Flatten(DebugNode root)
 	{

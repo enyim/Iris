@@ -1,23 +1,31 @@
 using Enyim.Iris.Protocol;
 
 using Enyim.Iris.Server.Dispatch;
+using Enyim.Iris.Server.Inspection;
+using Enyim.Iris.Server.Protocol;
 
 namespace Enyim.Iris.Server.AspNetCore;
 
-internal sealed class DomGetBoxModelHandler : ICdpCommandHandler<DOM.GetBoxModelRequest, DOM.GetBoxModelRequestResult>
+internal sealed class DomGetBoxModelHandler(IInspectionSnapshotStore store) : ICdpCommandHandler<DOM.GetBoxModelRequest, DOM.GetBoxModelRequestResult>
 {
 	public ValueTask<DOM.GetBoxModelRequestResult> HandleAsync(DOM.GetBoxModelRequest parameters, CdpCommandContext context)
 	{
-		var (x, y, w, h) = (100, 100, 400, 200);
+		var nodeId = parameters.NodeId.RequiredValue();
+		var node = store.GetNodeById(nodeId);
+
+		if (node.BoxModel is not { } bm)
+			return new(new DOM.GetBoxModelRequestResult(new DOM.BoxModelType(Content: Zero, Padding: Zero, Border: Zero, Margin: Zero, Width: 0, Height: 0)));
 
 		return new(new DOM.GetBoxModelRequestResult(new DOM.BoxModelType(
-			Content: Quad(x, y, w, h),
-			Padding: Quad(x, y, w, h),
-			Border: Quad(x, y, w, h),
-			Margin: Quad(x - 10, y - 10, w + 20, h + 20),
-			Width: (int)w,
-			Height: (int)h)));
+			Content: ToQuad(bm.Content),
+			Padding: ToQuad(bm.Padding),
+			Border:  ToQuad(bm.Border),
+			Margin:  ToQuad(bm.Margin),
+			Width:   bm.Border.X2 - bm.Border.X1,
+			Height:  bm.Border.Y4 - bm.Border.Y1)));
 
-		static DOM.QuadType Quad(double x, double y, double w, double h) => new([x, y, x + w, y, x + w, y + h, x, y + h]);
+		static DOM.QuadType ToQuad(Quad q) => new([q.X1, q.Y1, q.X2, q.Y2, q.X3, q.Y3, q.X4, q.Y4]);
 	}
+
+	private static readonly DOM.QuadType Zero = new([0, 0, 0, 0, 0, 0, 0, 0]);
 }
