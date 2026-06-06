@@ -3,16 +3,13 @@ using ChromeProtocol.Domains;
 using Enyim.Iris.Server.Dispatch;
 using Enyim.Iris.Server.Inspection;
 
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Enyim.Iris.Server.AspNetCore;
 
-internal sealed class DomGetNodesForSubtreeByStyleHandler : ICdpCommandHandler<DOM.GetNodesForSubtreeByStyleRequest, DOM.GetNodesForSubtreeByStyleRequestResult>
+internal sealed class DomGetNodesForSubtreeByStyleHandler(IInspectionSnapshotStore store)
+	: ICdpCommandHandler<DOM.GetNodesForSubtreeByStyleRequest, DOM.GetNodesForSubtreeByStyleRequestResult>
 {
 	public ValueTask<DOM.GetNodesForSubtreeByStyleRequestResult> HandleAsync(DOM.GetNodesForSubtreeByStyleRequest parameters, CdpCommandContext context)
 	{
-		var store = context.Services.GetRequiredService<IInspectionSnapshotStore>();
-		var mapper = context.Services.GetRequiredService<DebugNodeMapper>();
 		var tree = store.CurrentTree;
 
 		if (tree is null)
