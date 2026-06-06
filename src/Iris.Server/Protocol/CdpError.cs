@@ -44,6 +44,9 @@ public sealed record CdpError(int Code, string Message, string? Data = null)
 
 	public static CdpError ServerError(string message, string? data = null) =>
 		new((int)CdpErrorCode.ServerError, message, data);
+
+	public static CdpError NodeNotFound(int nodeId) =>
+		new((int)CdpErrorCode.ServerError, "No node with given id found", nodeId.ToString());
 }
 
 /// <summary>

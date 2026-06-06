@@ -42,6 +42,14 @@ WebSocket ─▶ WebSocketCdpConnection ─▶ CdpSession ─▶ CdpDispatcher �
   single-writer outbound `Channel` (WebSocket allows one concurrent send). `sessionId` is threaded
   through end to end; flatten/multi-target routing is a future addition.
 
+## Build
+
+The solution file is `src/Enyim.Iris.slnx`.
+
+```pwsh
+dotnet build src/Enyim.Iris.slnx
+```
+
 ## Run the sample
 
 ```pwsh
@@ -55,5 +63,5 @@ dotnet run --project samples/Cdp.Sample.BrowserEmulator
 ## Test
 
 ```pwsh
-dotnet test
+dotnet test src/Enyim.Iris.slnx
 ```

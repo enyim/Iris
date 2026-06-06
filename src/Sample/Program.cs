@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 using Enyim.Iris.Server.Hosting;
 using Enyim.Iris.Server.Inspection;
 
@@ -29,6 +31,7 @@ debug.PublishTree(new DebugNode(
 			new DebugNode(3, "HEAD"),
 			new DebugNode(4, "BODY", Children: [
 				new DebugNode(5, "H1",
+					ComputedStyle: GetStyles(),
 					Attributes: new Dictionary<string, string> { ["id"] = "title", ["class"] = "main-heading" }),
 				new DebugNode(6, "button", Children: [ new DebugNode(7, "helo", Kind: DebugNodeKind.Text) ]),
 			]),
@@ -45,3 +48,26 @@ Console.ReadLine();
 
 await debug.StopAsync();
 await debug.DisposeAsync();
+
+Dictionary<string, string> GetStyles()
+{
+	return new()
+	{
+			{"display", "block" },
+			{"position", "static" },
+			{"width", "400px"},
+			{"height", "200px"},
+			{"border-left-width", "0px"},
+			{"border-top-width", "0px"},
+			{"border-bottom-width", "0px"},
+			{"border-right-width", "0px"},
+			{"padding-left", "0px"},
+			{"padding-top", "0px"},
+			{"padding-bottom", "0px"},
+			{"padding-right", "0px"},
+			{"margin-left", "10px"},
+			{"margin-top", "10px"},
+			{"margin-bottom", "10px"},
+			{"margin-right", "10px"},
+	};
+}

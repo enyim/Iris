@@ -1,5 +1,7 @@
 using ChromeProtocol.Core;
 
+using Enyim.Iris.Server.Protocol;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using System.Text.Json.Serialization;
@@ -28,39 +30,41 @@ public static class InspectionDomains
 		cdp.AddCommandHandler<BrowserGetVersionHandler>();
 
 		// Target
-		cdp.AddCommandHandler<TargetSetDiscoverTargetsHandler>();
-		cdp.AddCommandHandler<TargetGetTargetsHandler>();
+		//cdp.AddCommandHandler<TargetSetDiscoverTargetsHandler>();
+		//cdp.AddCommandHandler<TargetGetTargetsHandler>();
 
 		// Page
-		cdp.AddCommandHandler<PageGetFrameTreeHandler>();
-		cdp.AddCommandHandler<PageGetResourceTreeHandler>();
-		cdp.AddCommandHandler<PageGetNavigationHistoryHandler>();
+		//cdp.AddCommandHandler<PageGetFrameTreeHandler>();
+		//cdp.AddCommandHandler<PageGetResourceTreeHandler>();
+		//cdp.AddCommandHandler<PageGetNavigationHistoryHandler>();
 
 		// Runtime
-		cdp.AddCommandHandler<RuntimeEnableHandler>();
+		//cdp.AddCommandHandler<RuntimeEnableHandler>();
 
 		// Debugger / Log / Network
-		cdp.AddCommandHandler<DebuggerEnableHandler>();
+		//cdp.AddCommandHandler<DebuggerEnableHandler>();
 		cdp.AddCommandHandler<LogEnableHandler>();
-		cdp.AddCommandHandler<NetworkEnableHandler>();
+		//cdp.AddCommandHandler<NetworkEnableHandler>();
 
 		// DOM
-		cdp.AddCommandHandler<DomGetNodesForSubtreeByStyleHandler>();
-		cdp.AddCommandHandler<DomGetDocumentHandler>();
-		cdp.AddCommandHandler<DomRequestChildNodesHandler>();
 		cdp.AddCommandHandler<DomEnableHandler>();
+		cdp.AddCommandHandler<DomGetDocumentHandler>();
 		cdp.AddCommandHandler<DomGetBoxModelHandler>();
-		cdp.AddCommandHandler<DomSetInspectedNodeHandler>();
-		cdp.AddCommandHandler<DomPushNodesByBackendIdsToFrontendHandler>();
-		cdp.AddCommandHandler<DomResolveNodeHandler>();
+
+		//cdp.AddCommandHandler<DomGetNodesForSubtreeByStyleHandler>();
+		//cdp.AddCommandHandler<DomRequestChildNodesHandler>();
+		//cdp.AddCommandHandler<DomSetInspectedNodeHandler>();
+		//cdp.AddCommandHandler<DomPushNodesByBackendIdsToFrontendHandler>();
+		//cdp.AddCommandHandler<DomResolveNodeHandler>();
 
 		// CSS
 		cdp.AddCommandHandler<CssEnableHandler>();
 		cdp.AddCommandHandler<CssGetComputedStyleForNodeHandler>();
 		cdp.AddCommandHandler<CssGetMatchedStylesForNodeHandler>();
-		cdp.AddCommandHandler<CssTrackComputedStyleUpdatesHandler>();
-		cdp.AddCommandHandler<CssGetPlatformFontsForNodeHandler>();
 		cdp.AddCommandHandler<CssGetInlineStylesForNodeHandler>();
+		//cdp.AddCommandHandler<CssTrackComputedStyleUpdatesHandler>();
+		//cdp.AddCommandHandler<CssTrackComputedStyleUpdatesForNodeHandler>();
+		//cdp.AddCommandHandler<CssGetPlatformFontsForNodeHandler>();
 
 		// Inspector
 		cdp.AddCommandHandler<InspectorEnableHandler>();
@@ -72,9 +76,7 @@ public static class InspectionDomains
 		// Memory
 		cdp.AddCommandHandler<MemoryGetDomCountersHandler>();
 
-		// Custom / non-standard
-		cdp.AddCommandHandler<TrackComputedStyleUpdatesForNodeHandler>();
-
+		cdp.MapWhen(c => c.EndsWith(".enable"), ctx => ValueTask.FromResult(new CdpResult()));
 		//cdp.AllowUnhandledCommands();
 
 		return cdp;

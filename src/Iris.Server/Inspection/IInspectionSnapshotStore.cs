@@ -12,6 +12,7 @@ public interface IInspectionSnapshotStore
 	void SetTree(DebugNode root);
 	DebugNode? CurrentTree { get; }
 	DebugNode GetNodeById(int id);
+	bool TryGetNodeById(int id, out DebugNode node);
 }
 
 public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
@@ -28,8 +29,10 @@ public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
 
 	public DebugNode? CurrentTree => _tree;
 
+	public bool TryGetNodeById(int id, out DebugNode node) => nodesById.TryGetValue(id, out node!);
+
 	public DebugNode GetNodeById(int id) =>
-		nodesById.TryGetValue(id, out var node)
+		TryGetNodeById(id, out var node)
 			? node
 			: throw new KeyNotFoundException($"Node {id} not found in the current snapshot.");
 
