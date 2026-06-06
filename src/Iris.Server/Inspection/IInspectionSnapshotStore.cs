@@ -1,3 +1,5 @@
+using System.Collections.Frozen;
+
 namespace Enyim.Iris.Server.Inspection;
 
 /// <summary>
@@ -13,9 +15,34 @@ public interface IInspectionSnapshotStore
 
 public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
 {
-	private volatile DebugNode? _tree;
+	private DebugNode? _tree;
 
-	public void SetTree(DebugNode root) => _tree = root;
+	private FrozenDictionary<string, DebugNode> nodesById = new Dictionary<string, DebugNode>().ToFrozenDictionary();
+
+	public void SetTree(DebugNode root)
+	{
+		_tree = root;
+		nodesById = Flatten(root).ToFrozenDictionary();
+	}
 
 	public DebugNode? CurrentTree => _tree;
+
+	static IEnumerable<KeyValuePair<string, DebugNode>> Flatten(DebugNode root)
+	{
+		var stack = new Stack<DebugNode>();
+		stack.Push(root);
+
+		while (stack.Count > 0)
+		{
+			var node = stack.Pop();
+			yield return new KeyValuePair<string, DebugNode>(node.Id, node);
+			if (node.Children is null) continue;
+
+			foreach (var child in node.Children)
+			{
+				stack.Push(child);
+			}
+		}
+	}
+
 }

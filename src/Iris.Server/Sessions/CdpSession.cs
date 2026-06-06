@@ -217,28 +217,45 @@ public sealed class CdpSession : ICdpClientConnection, IAsyncDisposable
 			? new CdpErrorMessage(id, result.Error!, message.SessionId)
 			: new CdpResultMessage(id, result.Result, message.SessionId);
 
-		await EnqueueAsync(response, token).ConfigureAwait(false);
+		// Use CancellationToken.None: a response must be queued regardless of connection-token state.
+		await EnqueueAsync(response, CancellationToken.None).ConfigureAwait(false);
 	}
 
 	private async Task WriteLoopAsync(CancellationToken token)
 	{
 		var buffer = new ArrayBufferWriter<byte>(initialCapacity: 4096);
-		try
+
+		// Use CancellationToken.None so the loop drains all queued messages when the channel is
+		// completed (TryComplete), rather than abandoning them the moment the connection token fires.
+		await foreach (var message in _outbound.Reader.ReadAllAsync(CancellationToken.None).ConfigureAwait(false))
 		{
-			await foreach (var message in _outbound.Reader.ReadAllAsync(token).ConfigureAwait(false))
+			buffer.ResetWrittenCount();
+
+			// Serialization failures must not kill the loop — skip the bad message and keep going.
+			try
 			{
-				buffer.ResetWrittenCount();
 				message.WriteTo(buffer, CdpJson.Payload);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "[{ConnectionId}] Failed to serialize outbound message, skipping", ConnectionId);
+				continue;
+			}
+
+			try
+			{
 				await _connection.SendAsync(buffer.WrittenMemory, token).ConfigureAwait(false);
 			}
-		}
-		catch (OperationCanceledException)
-		{
-			// Shutting down.
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "[{ConnectionId}] Outbound write loop terminated unexpectedly", ConnectionId);
+			catch (OperationCanceledException) when (token.IsCancellationRequested)
+			{
+				// Connection is going away; stop draining.
+				break;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "[{ConnectionId}] Outbound SendAsync failed, terminating write loop", ConnectionId);
+				break;
+			}
 		}
 	}
 

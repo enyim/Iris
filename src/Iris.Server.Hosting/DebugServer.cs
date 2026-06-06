@@ -8,6 +8,7 @@ using ChromeProtocol.Domains;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Enyim.Iris.Server.Dispatch;
 
 namespace Enyim.Iris.Server.Hosting;
 

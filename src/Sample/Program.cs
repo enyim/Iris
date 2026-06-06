@@ -9,6 +9,7 @@ var debug = DebugServer.Create(o =>
 	o.BrowserName = "Chrome/124.0.6367.207";
 	o.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 				   + "(KHTML, like Gecko) Chrome/124.0.6367.207 Safari/537.36";
+
 	o.MemoryProvider = static () => new MemoryStats(
 		GC.GetTotalMemory(false),
 		GC.CollectionCount(0),
@@ -28,8 +29,8 @@ debug.PublishTree(new DebugNode(
 			new DebugNode("head", "HEAD"),
 			new DebugNode("body", "BODY", Children: [
 				new DebugNode("h1", "H1",
-					Attributes: [new("id", "title"), new("class", "main-heading")]),
-				new DebugNode("p", "P"),
+					Attributes: new Dictionary<string, string> { ["id"] = "title", ["class"] = "main-heading" }),
+				new DebugNode("p", "button", Children: [ new DebugNode("helo", "helo", Kind: DebugNodeKind.Text) ]),
 			]),
 		]),
 	]));

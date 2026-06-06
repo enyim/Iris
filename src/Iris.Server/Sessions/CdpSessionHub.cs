@@ -16,7 +16,10 @@ public sealed class CdpSessionHub : ICdpSessionHub
 	public ValueTask BroadcastAsync(IEvent evt, CancellationToken cancellationToken = default)
 	{
 		foreach (var (session, _) in _sessions)
+		{
 			session.TryEmit(evt);
+		}
+
 		return ValueTask.CompletedTask;
 	}
 }

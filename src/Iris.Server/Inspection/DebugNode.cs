@@ -11,7 +11,9 @@ public sealed record DebugNode(
 	string Id,
 	string Name,
 	DebugNodeKind Kind = DebugNodeKind.Element,
-	IReadOnlyList<KeyValuePair<string, string>>? Attributes = null,
+	IReadOnlyList<string>? Classes = null,
+	IReadOnlyDictionary<string, string>? Attributes = null,
+	IReadOnlyDictionary<string, string>? ComputedStyle = null,
 	IReadOnlyList<DebugNode>? Children = null);
 
 public enum DebugLogLevel { Verbose, Info, Warning, Error }
