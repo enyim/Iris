@@ -39,10 +39,12 @@ public sealed class DebugNodeMapper
 		if (node.Attributes is { Count: > 0 } attrList)
 		{
 			var flat = new string[attrList.Count * 2];
-			for (var i = 0; i < attrList.Count; i++)
+			var i = 0;
+			foreach (var kvp in attrList)
 			{
-				flat[i * 2] = attrList[i].Key;
-				flat[i * 2 + 1] = attrList[i].Value;
+				flat[i * 2] = kvp.Key;
+				flat[i * 2 + 1] = kvp.Value;
+				i++;
 			}
 			attrs = flat;
 		}

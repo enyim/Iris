@@ -71,14 +71,13 @@ public sealed class IntegrationTests : IAsyncLifetime
 	}
 
 	[Fact]
-	public async Task Unhandled_command_returns_empty_success_over_websocket()
+	public async Task Unhandled_command_returns_error_over_websocket()
 	{
 		using var socket = await ConnectToPageAsync();
 		await SendAsync(socket, """{"id":2,"method":"Overlay.enable"}""");
 		using var response = await ReceiveAsync(socket);
 		Assert.Equal(2, response.RootElement.GetProperty("id").GetInt32());
-		Assert.False(response.RootElement.TryGetProperty("error", out _));
-		Assert.Equal(JsonValueKind.Object, response.RootElement.GetProperty("result").ValueKind);
+		Assert.True(response.RootElement.TryGetProperty("error", out _));
 	}
 
 	[Fact]

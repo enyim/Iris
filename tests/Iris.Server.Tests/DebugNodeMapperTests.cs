@@ -41,7 +41,7 @@ public class DebugNodeMapperTests
 	public void MapTree_attributes_are_flattened_as_name_value_pairs()
 	{
 		var node = _mapper.MapTree(new DebugNode("n", "SPAN",
-			Attributes: [new("id", "x"), new("class", "y")]));
+			Attributes: new Dictionary<string, string> { ["id"] = "x", ["class"] = "y" }));
 
 		var attrs = node.Attributes;
 		Assert.NotNull(attrs);

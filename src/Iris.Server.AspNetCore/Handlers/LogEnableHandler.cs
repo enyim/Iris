@@ -1,0 +1,11 @@
+using ChromeProtocol.Domains;
+
+using Enyim.Iris.Server.Dispatch;
+
+namespace Enyim.Iris.Server.AspNetCore;
+
+internal sealed class LogEnableHandler : ICdpCommandHandler<Log.EnableRequest, Log.EnableRequestResult>
+{
+	public ValueTask<Log.EnableRequestResult> HandleAsync(Log.EnableRequest parameters, CdpCommandContext context) =>
+		new(new Log.EnableRequestResult());
+}
