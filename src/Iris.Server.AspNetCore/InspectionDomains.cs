@@ -1,10 +1,6 @@
-using ChromeProtocol.Core;
-
 using Enyim.Iris.Server.Protocol;
 
 using Microsoft.Extensions.DependencyInjection;
-
-using System.Text.Json.Serialization;
 
 namespace Enyim.Iris.Server.AspNetCore;
 
@@ -26,6 +22,13 @@ public static class InspectionDomains
 	{
 		cdp.Services.AddSingleton(new InspectionTargetOptions { Url = targetUrl, Title = targetTitle });
 
+		// init
+		cdp.AddCommandHandler<RuntimeEnableHandler>();
+		cdp.AddCommandHandler<DebuggerEnableHandler>();
+		cdp.AddCommandHandler<LogEnableHandler>();
+		cdp.AddCommandHandler<InspectorEnableHandler>();
+		cdp.AddCommandHandler<OverlayEnableHandler>();
+
 		// Browser
 		cdp.AddCommandHandler<BrowserGetVersionHandler>();
 
@@ -37,14 +40,6 @@ public static class InspectionDomains
 		//cdp.AddCommandHandler<PageGetFrameTreeHandler>();
 		//cdp.AddCommandHandler<PageGetResourceTreeHandler>();
 		//cdp.AddCommandHandler<PageGetNavigationHistoryHandler>();
-
-		// Runtime
-		//cdp.AddCommandHandler<RuntimeEnableHandler>();
-
-		// Debugger / Log / Network
-		//cdp.AddCommandHandler<DebuggerEnableHandler>();
-		cdp.AddCommandHandler<LogEnableHandler>();
-		//cdp.AddCommandHandler<NetworkEnableHandler>();
 
 		// DOM
 		cdp.AddCommandHandler<DomEnableHandler>();
@@ -66,24 +61,17 @@ public static class InspectionDomains
 		//cdp.AddCommandHandler<CssTrackComputedStyleUpdatesForNodeHandler>();
 		//cdp.AddCommandHandler<CssGetPlatformFontsForNodeHandler>();
 
-		// Inspector
-		cdp.AddCommandHandler<InspectorEnableHandler>();
-
 		// Overlay
-		cdp.AddCommandHandler<OverlaySetShowGridOverlaysHandler>();
-		cdp.AddCommandHandler<OverlaySetShowFlexOverlaysHandler>();
+		//cdp.AddCommandHandler<OverlaySetShowGridOverlaysHandler>();
+		//cdp.AddCommandHandler<OverlaySetShowFlexOverlaysHandler>();
 
 		// Memory
-		cdp.AddCommandHandler<MemoryGetDomCountersHandler>();
+		//cdp.AddCommandHandler<MemoryGetDomCountersHandler>();
 
+		// whatever
 		cdp.MapWhen(c => c.EndsWith(".enable"), ctx => ValueTask.FromResult(new CdpResult()));
 		//cdp.AllowUnhandledCommands();
 
 		return cdp;
 	}
 }
-
-[MethodName("CSS.trackComputedStyleUpdatesForNode")]
-public record TrackComputedStyleUpdatesForNodeRequest([property: JsonPropertyName("nodeId")] ChromeProtocol.Domains.DOM.NodeIdType NodeId) : ICommand<TrackComputedStyleUpdatesForNodeRequestResult>, ICommand;
-
-public record TrackComputedStyleUpdatesForNodeRequestResult : ChromeProtocol.Core.IType;

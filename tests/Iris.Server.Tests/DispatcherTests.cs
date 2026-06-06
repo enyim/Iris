@@ -1,7 +1,7 @@
 using Enyim.Iris.Server.Dispatch;
 using Enyim.Iris.Server.Protocol;
 
-using ChromeProtocol.Domains;
+using Enyim.Iris.Protocol;
 
 namespace Enyim.Iris.Server.Tests;
 

@@ -3,7 +3,7 @@ using Enyim.Iris.Server.Events;
 using Enyim.Iris.Server.Protocol;
 using Enyim.Iris.Server.Sessions;
 
-using ChromeProtocol.Domains;
+using Enyim.Iris.Protocol;
 
 namespace Enyim.Iris.Server.Tests;
 

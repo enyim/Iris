@@ -1,4 +1,4 @@
-using ChromeProtocol.Domains;
+using Enyim.Iris.Protocol;
 
 using Enyim.Iris.Server.Dispatch;
 

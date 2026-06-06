@@ -52,9 +52,8 @@ public sealed class CdpContractIndex
 		return dot < 0 ? (method, String.Empty) : (method[..dot], method[(dot + 1)..]);
 	}
 
-	/// <summary>The index built from the official <c>ChromeProtocol.Domains</c> assembly.</summary>
 	public static CdpContractIndex Default { get; } =
-		FromAssembly(typeof(ChromeProtocol.Domains.Browser).Assembly);
+		FromAssembly(typeof(Enyim.Iris.Protocol.Browser).Assembly);
 
 	public IReadOnlyCollection<CdpCommandDescriptor> Commands => _commandsByMethod.Values;
 

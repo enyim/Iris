@@ -6,7 +6,7 @@ using Enyim.Iris.Server.Protocol;
 using Enyim.Iris.Server.Sessions;
 using Enyim.Iris.Server.Transport;
 
-using ChromeProtocol.Domains;
+using Enyim.Iris.Protocol;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;

@@ -1,6 +1,6 @@
 using Enyim.Iris.Server.Contracts;
 
-using ChromeProtocol.Domains;
+using Enyim.Iris.Protocol;
 
 namespace Enyim.Iris.Server.Tests;
 

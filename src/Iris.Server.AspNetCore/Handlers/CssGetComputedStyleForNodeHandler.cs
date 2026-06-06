@@ -1,4 +1,4 @@
-using ChromeProtocol.Domains;
+using Enyim.Iris.Protocol;
 
 using Enyim.Iris.Server.Dispatch;
 using Enyim.Iris.Server.Inspection;
@@ -18,6 +18,6 @@ internal sealed class CssGetComputedStyleForNodeHandler(IInspectionSnapshotStore
 			? style.Select(kvp => new CSS.CSSComputedStylePropertyType(kvp.Key, kvp.Value)).ToArray()
 			: [];
 
-		return new(new CSS.GetComputedStyleForNodeRequestResult(props));
+		return new(new CSS.GetComputedStyleForNodeRequestResult(props, new CSS.ComputedStyleExtraFieldsType(IsAppearanceBase: false)));
 	}
 }

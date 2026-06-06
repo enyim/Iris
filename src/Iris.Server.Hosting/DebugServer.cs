@@ -3,7 +3,7 @@ using Enyim.Iris.Server.Inspection;
 using Enyim.Iris.Server.Sessions;
 using Enyim.Iris.Server.Targets;
 
-using ChromeProtocol.Domains;
+using Enyim.Iris.Protocol;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;

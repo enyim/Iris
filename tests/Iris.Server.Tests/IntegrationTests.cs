@@ -74,7 +74,7 @@ public sealed class IntegrationTests : IAsyncLifetime
 	public async Task Unhandled_command_returns_error_over_websocket()
 	{
 		using var socket = await ConnectToPageAsync();
-		await SendAsync(socket, """{"id":2,"method":"Overlay.enable"}""");
+		await SendAsync(socket, """{"id":2,"method":"Unknown.soVeryUnhandled"}""");
 		using var response = await ReceiveAsync(socket);
 		Assert.Equal(2, response.RootElement.GetProperty("id").GetInt32());
 		Assert.True(response.RootElement.TryGetProperty("error", out _));
@@ -94,9 +94,13 @@ public sealed class IntegrationTests : IAsyncLifetime
 			var root = message.RootElement;
 			if (root.TryGetProperty("method", out var method) &&
 				method.GetString() == "Runtime.executionContextCreated")
+			{
 				sawEvent = true;
+			}
 			else if (root.TryGetProperty("id", out var id) && id.GetInt32() == 3)
+			{
 				sawResponse = true;
+			}
 		}
 		Assert.True(sawEvent, "Expected Runtime.executionContextCreated after Runtime.enable");
 	}
