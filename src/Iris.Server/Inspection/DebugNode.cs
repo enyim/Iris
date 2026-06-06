@@ -8,7 +8,7 @@ public enum DebugNodeKind { Element, Document, Text }
 /// the server maps it to DOM types internally.
 /// </summary>
 public sealed record DebugNode(
-	string Id,
+	int Id,
 	string Name,
 	DebugNodeKind Kind = DebugNodeKind.Element,
 	IReadOnlyList<string>? Classes = null,

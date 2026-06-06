@@ -21,16 +21,16 @@ await debug.StartAsync();
 
 // Push a static control tree so the Elements panel is populated immediately.
 debug.PublishTree(new DebugNode(
-	Id: "doc",
+	Id: 1,
 	Name: "#document",
 	Kind: DebugNodeKind.Document,
 	Children: [
-		new DebugNode("html", "HTML", Children: [
-			new DebugNode("head", "HEAD"),
-			new DebugNode("body", "BODY", Children: [
-				new DebugNode("h1", "H1",
+		new DebugNode(2, "HTML", Children: [
+			new DebugNode(3, "HEAD"),
+			new DebugNode(4, "BODY", Children: [
+				new DebugNode(5, "H1",
 					Attributes: new Dictionary<string, string> { ["id"] = "title", ["class"] = "main-heading" }),
-				new DebugNode("p", "button", Children: [ new DebugNode("helo", "helo", Kind: DebugNodeKind.Text) ]),
+				new DebugNode(6, "button", Children: [ new DebugNode(7, "helo", Kind: DebugNodeKind.Text) ]),
 			]),
 		]),
 	]));

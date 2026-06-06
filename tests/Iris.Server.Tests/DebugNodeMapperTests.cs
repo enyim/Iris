@@ -9,7 +9,7 @@ public class DebugNodeMapperTests
 	[Fact]
 	public void MapTree_document_node_has_correct_type()
 	{
-		var doc = _mapper.MapTree(new DebugNode("d", "#document", DebugNodeKind.Document));
+		var doc = _mapper.MapTree(new DebugNode(1, "#document", DebugNodeKind.Document));
 		Assert.Equal(9, doc.NodeTypeProperty);
 		Assert.Equal("#document", doc.NodeName);
 	}
@@ -17,30 +17,30 @@ public class DebugNodeMapperTests
 	[Fact]
 	public void MapTree_element_names_are_uppercased()
 	{
-		var node = _mapper.MapTree(new DebugNode("e", "div"));
+		var node = _mapper.MapTree(new DebugNode(1, "div"));
 		Assert.Equal("DIV", node.NodeName);
 		Assert.Equal("div", node.LocalName);
 	}
 
 	[Fact]
-	public void MapTree_assigns_sequential_ids_depth_first()
+	public void MapTree_uses_caller_provided_ids()
 	{
-		var root = new DebugNode("r", "#document", DebugNodeKind.Document,
+		var root = new DebugNode(10, "#document", DebugNodeKind.Document,
 			Children: [
-				new DebugNode("a", "A"),
-				new DebugNode("b", "B"),
+				new DebugNode(20, "A"),
+				new DebugNode(30, "B"),
 			]);
 
 		var mapped = _mapper.MapTree(root);
-		Assert.Equal(1, mapped.NodeId.Value);
-		Assert.Equal(2, mapped.Children![0].NodeId.Value);
-		Assert.Equal(3, mapped.Children![1].NodeId.Value);
+		Assert.Equal(10, mapped.NodeId.Value);
+		Assert.Equal(20, mapped.Children![0].NodeId.Value);
+		Assert.Equal(30, mapped.Children![1].NodeId.Value);
 	}
 
 	[Fact]
 	public void MapTree_attributes_are_flattened_as_name_value_pairs()
 	{
-		var node = _mapper.MapTree(new DebugNode("n", "SPAN",
+		var node = _mapper.MapTree(new DebugNode(1, "SPAN",
 			Attributes: new Dictionary<string, string> { ["id"] = "x", ["class"] = "y" }));
 
 		var attrs = node.Attributes;
@@ -51,7 +51,7 @@ public class DebugNodeMapperTests
 	[Fact]
 	public void MapTree_text_node_carries_name_as_value()
 	{
-		var node = _mapper.MapTree(new DebugNode("t", "hello world", DebugNodeKind.Text));
+		var node = _mapper.MapTree(new DebugNode(1, "hello world", DebugNodeKind.Text));
 		Assert.Equal(3, node.NodeTypeProperty);
 		Assert.Equal("hello world", node.NodeValue);
 		Assert.Equal("#text", node.NodeName);
@@ -86,7 +86,7 @@ public class DebugNodeMapperTests
 		var store = new InspectionSnapshotStore();
 		Assert.Null(store.CurrentTree);
 
-		var node = new DebugNode("r", "ROOT");
+		var node = new DebugNode(1, "ROOT");
 		store.SetTree(node);
 		Assert.Same(node, store.CurrentTree);
 	}

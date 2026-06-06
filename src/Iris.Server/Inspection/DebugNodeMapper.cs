@@ -2,23 +2,13 @@ using ChromeProtocol.Domains;
 
 namespace Enyim.Iris.Server.Inspection;
 
-/// <summary>
-/// Maps neutral model types to CDP wire types. Stateless singleton — safe to share.
-/// Node IDs are reassigned per <see cref="MapTree"/> call; callers must broadcast
-/// <c>DOM.documentUpdated</c> after publishing so DevTools discards its stale id cache.
-/// </summary>
+/// <summary>Maps neutral model types to CDP wire types. Stateless singleton — safe to share.</summary>
 public sealed class DebugNodeMapper
 {
-	public DOM.NodeType MapTree(DebugNode root)
-	{
-		var nextId = 1;
-		return MapNode(root, ref nextId);
-	}
+	public DOM.NodeType MapTree(DebugNode root) => MapNode(root);
 
-	private static DOM.NodeType MapNode(DebugNode node, ref int nextId)
+	private static DOM.NodeType MapNode(DebugNode node)
 	{
-		var id = nextId++;
-
 		var (nodeTypeProperty, nodeName, localName) = node.Kind switch
 		{
 			DebugNodeKind.Document => (9, "#document", ""),
@@ -31,7 +21,7 @@ public sealed class DebugNodeMapper
 		{
 			children = new DOM.NodeType[childList.Count];
 			for (var i = 0; i < childList.Count; i++)
-				children[i] = MapNode(childList[i], ref nextId);
+				children[i] = MapNode(childList[i]);
 		}
 
 		// CDP attributes are a flat [name, value, name, value, …] string array.
@@ -50,8 +40,8 @@ public sealed class DebugNodeMapper
 		}
 
 		return new DOM.NodeType(
-			NodeId: new DOM.NodeIdType(id),
-			BackendNodeId: new DOM.BackendNodeIdType(id),
+			NodeId: new DOM.NodeIdType(node.Id),
+			BackendNodeId: new DOM.BackendNodeIdType(node.Id),
 			NodeTypeProperty: nodeTypeProperty,
 			NodeName: nodeName,
 			LocalName: localName,

@@ -17,7 +17,7 @@ public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
 {
 	private DebugNode? _tree;
 
-	private FrozenDictionary<string, DebugNode> nodesById = new Dictionary<string, DebugNode>().ToFrozenDictionary();
+	private FrozenDictionary<int, DebugNode> nodesById = new Dictionary<int, DebugNode>().ToFrozenDictionary();
 
 	public void SetTree(DebugNode root)
 	{
@@ -27,7 +27,7 @@ public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
 
 	public DebugNode? CurrentTree => _tree;
 
-	static IEnumerable<KeyValuePair<string, DebugNode>> Flatten(DebugNode root)
+	static IEnumerable<KeyValuePair<int, DebugNode>> Flatten(DebugNode root)
 	{
 		var stack = new Stack<DebugNode>();
 		stack.Push(root);
@@ -35,7 +35,7 @@ public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
 		while (stack.Count > 0)
 		{
 			var node = stack.Pop();
-			yield return new KeyValuePair<string, DebugNode>(node.Id, node);
+			yield return new KeyValuePair<int, DebugNode>(node.Id, node);
 			if (node.Children is null) continue;
 
 			foreach (var child in node.Children)

@@ -111,7 +111,7 @@ public sealed class IntegrationTests : IAsyncLifetime
 		// Absorb the response (DOM.enable is handled by AllowUnhandledCommands).
 		await ReceiveAsync(socket);
 
-		_debug.PublishTree(new DebugNode("root", "#document", DebugNodeKind.Document));
+		_debug.PublishTree(new DebugNode(1, "#document", DebugNodeKind.Document));
 
 		// Drain messages until we see documentUpdated or timeout.
 		var sawEvent = false;
@@ -151,8 +151,8 @@ public sealed class IntegrationTests : IAsyncLifetime
 	[Fact]
 	public async Task GetDocument_returns_mapped_tree_after_PublishTree()
 	{
-		_debug.PublishTree(new DebugNode("root", "#document", DebugNodeKind.Document,
-			Children: [new DebugNode("body", "BODY")]));
+		_debug.PublishTree(new DebugNode(1, "#document", DebugNodeKind.Document,
+			Children: [new DebugNode(2, "BODY")]));
 
 		using var socket = await ConnectToPageAsync();
 		await SendAsync(socket, """{"id":30,"method":"DOM.getDocument"}""");
