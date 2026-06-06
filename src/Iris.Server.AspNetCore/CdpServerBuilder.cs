@@ -30,6 +30,13 @@ public interface ICdpServerBuilder
 	/// <summary>Registers a raw handler delegate for an explicit method.</summary>
 	ICdpServerBuilder MapRaw(string method, CdpCommandDelegate handler);
 
+	/// <summary>
+	/// Registers a predicate-based handler invoked when <paramref name="predicate"/> returns
+	/// <see langword="true"/> for the method name. Checked in registration order after all
+	/// typed handlers but before the fallback.
+	/// </summary>
+	ICdpServerBuilder MapWhen(Func<string, bool> predicate, CdpCommandDelegate handler);
+
 	/// <summary>Sets the handler used for any command without a specific handler.</summary>
 	ICdpServerBuilder MapFallback(CdpCommandDelegate handler);
 
@@ -75,6 +82,12 @@ internal sealed class CdpServerBuilder(IServiceCollection services, CdpCommandRe
 	public ICdpServerBuilder MapRaw(string method, CdpCommandDelegate handler)
 	{
 		registry.Map(method, handler);
+		return this;
+	}
+
+	public ICdpServerBuilder MapWhen(Func<string, bool> predicate, CdpCommandDelegate handler)
+	{
+		registry.MapWhen(predicate, handler);
 		return this;
 	}
 

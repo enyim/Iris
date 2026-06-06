@@ -15,6 +15,13 @@ public interface ICdpCommandRegistry
 	/// <summary>Registers (or replaces) the handler for a method.</summary>
 	ICdpCommandRegistry Map(string method, CdpCommandDelegate handler);
 
+	/// <summary>
+	/// Registers a predicate-based handler invoked when <paramref name="predicate"/> returns
+	/// <see langword="true"/> for the method name. Checked in registration order, after all
+	/// exact-match handlers but before the <see cref="Fallback"/>.
+	/// </summary>
+	ICdpCommandRegistry MapWhen(Func<string, bool> predicate, CdpCommandDelegate handler);
+
 	bool TryGet(string method, out CdpCommandDelegate handler);
 
 	IReadOnlyCollection<string> Methods { get; }
@@ -30,6 +37,7 @@ public interface ICdpCommandRegistry
 public sealed class CdpCommandRegistry : ICdpCommandRegistry
 {
 	private readonly Dictionary<string, CdpCommandDelegate> _handlers = new(StringComparer.Ordinal);
+	private readonly List<(Func<string, bool> Predicate, CdpCommandDelegate Handler)> _predicateHandlers = [];
 
 	public CdpCommandDelegate? Fallback { get; set; }
 
@@ -40,8 +48,31 @@ public sealed class CdpCommandRegistry : ICdpCommandRegistry
 		return this;
 	}
 
-	public bool TryGet(string method, out CdpCommandDelegate handler) =>
-		_handlers.TryGetValue(method, out handler!);
+	public ICdpCommandRegistry MapWhen(Func<string, bool> predicate, CdpCommandDelegate handler)
+	{
+		ArgumentNullException.ThrowIfNull(predicate);
+		ArgumentNullException.ThrowIfNull(handler);
+		_predicateHandlers.Add((predicate, handler));
+		return this;
+	}
+
+	public bool TryGet(string method, out CdpCommandDelegate handler)
+	{
+		if (_handlers.TryGetValue(method, out handler!))
+			return true;
+
+		foreach (var (predicate, predicateHandler) in _predicateHandlers)
+		{
+			if (predicate(method))
+			{
+				handler = predicateHandler;
+				return true;
+			}
+		}
+
+		handler = null!;
+		return false;
+	}
 
 	public IReadOnlyCollection<string> Methods => _handlers.Keys;
 }
