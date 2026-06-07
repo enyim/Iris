@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <ProjectReference Include="..\Iris.Protocol\Iris.Protocol.csproj" />
     <ProjectReference Include="..\Iris.Server.Hosting\Iris.Server.Hosting.csproj" />
   </ItemGroup>
 

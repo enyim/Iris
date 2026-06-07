@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Enyim.Iris.Server.AspNetCore;
@@ -78,15 +79,18 @@ public static class CdpServerEndpointRouteBuilderExtensions
 	private static async Task WriteJsonAsync(HttpContext context, object? payload)
 	{
 		var bytes = JsonSerializer.SerializeToUtf8Bytes(payload, CdpJson.Payload);
+
 		context.Response.StatusCode = StatusCodes.Status200OK;
 		context.Response.ContentType = "application/json; charset=UTF-8";
 		context.Response.ContentLength = bytes.Length;
+
 		await context.Response.Body.WriteAsync(bytes, context.RequestAborted);
 	}
 
 	private static IResult ActivateTarget(HttpContext context, string id)
 	{
 		var registry = context.RequestServices.GetRequiredService<ICdpTargetRegistry>();
+
 		return registry.TryGet(id, out _)
 			? Results.Text("Target activated")
 			: Results.NotFound($"No such target id: {id}");
@@ -95,6 +99,7 @@ public static class CdpServerEndpointRouteBuilderExtensions
 	private static IResult CloseTarget(HttpContext context, string id)
 	{
 		var registry = context.RequestServices.GetRequiredService<ICdpTargetRegistry>();
+
 		return registry.Remove(id)
 			? Results.Text("Target is closing")
 			: Results.NotFound($"No such target id: {id}");
@@ -127,7 +132,8 @@ public static class CdpServerEndpointRouteBuilderExtensions
 
 		using var socket = await context.WebSockets.AcceptWebSocketAsync();
 		var factory = context.RequestServices.GetRequiredService<CdpSessionFactory>();
-		var connection = new WebSocketCdpConnection(socket);
+		var connection = new WebSocketCdpConnection(socket, context.RequestServices.GetRequiredService<ILogger<WebSocketCdpConnection>>());
+
 		await using var session = factory.Create(connection, connectionId);
 		await session.RunAsync(context.RequestAborted);
 	}

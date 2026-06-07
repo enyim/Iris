@@ -3,10 +3,12 @@ using System.Net.WebSockets;
 
 using Enyim.Iris.Server.Transport;
 
+using Microsoft.Extensions.Logging;
+
 namespace Enyim.Iris.Server.AspNetCore;
 
 /// <summary>Adapts a <see cref="WebSocket"/> to <see cref="ICdpConnection"/>, assembling fragmented text frames.</summary>
-internal sealed class WebSocketCdpConnection(WebSocket socket) : ICdpConnection
+internal sealed class WebSocketCdpConnection(WebSocket socket, ILogger<WebSocketCdpConnection> logger) : ICdpConnection
 {
 	private readonly ArrayBufferWriter<byte> _receiveBuffer = new(initialCapacity: 8192);
 
@@ -37,8 +39,10 @@ internal sealed class WebSocketCdpConnection(WebSocket socket) : ICdpConnection
 		}
 	}
 
-	public ValueTask SendAsync(ReadOnlyMemory<byte> utf8Payload, CancellationToken cancellationToken) =>
-		socket.SendAsync(utf8Payload, WebSocketMessageType.Text, endOfMessage: true, cancellationToken);
+	public ValueTask SendAsync(ReadOnlyMemory<byte> utf8Payload, CancellationToken cancellationToken)
+	{
+		return socket.SendAsync(utf8Payload, WebSocketMessageType.Text, endOfMessage: true, cancellationToken);
+	}
 
 	public async ValueTask CloseAsync(CancellationToken cancellationToken)
 	{
@@ -49,9 +53,9 @@ internal sealed class WebSocketCdpConnection(WebSocket socket) : ICdpConnection
 				await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, statusDescription: null, cancellationToken)
 					.ConfigureAwait(false);
 			}
-			catch (WebSocketException)
+			catch (WebSocketException e)
 			{
-				// Peer already gone; nothing to do.
+				logger.LogError(e, "Error while closing connection");
 			}
 		}
 	}

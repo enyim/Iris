@@ -1,6 +1,5 @@
 using Enyim.Iris.Server.Contracts;
 using Enyim.Iris.Server.Dispatch;
-using Enyim.Iris.Server.Inspection;
 using Enyim.Iris.Server.Sessions;
 using Enyim.Iris.Server.Targets;
 
@@ -33,8 +32,6 @@ public static class CdpServerServiceCollectionExtensions
 		services.TryAddSingleton<ICdpDispatcher, CdpDispatcher>();
 		services.TryAddSingleton<ICdpTargetRegistry, CdpTargetRegistry>();
 		services.TryAddSingleton<ICdpSessionHub, CdpSessionHub>();
-		services.TryAddSingleton<IInspectionSnapshotStore, InspectionSnapshotStore>();
-		services.TryAddSingleton<DebugNodeMapper>();
 		services.TryAddSingleton<CdpSessionFactory>();
 
 		return new CdpServerBuilder(services, registry, index);

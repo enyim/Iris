@@ -1,5 +1,3 @@
-using Enyim.Iris.Server.Inspection;
-
 namespace Enyim.Iris.Server.Hosting;
 
 /// <summary>Configuration for an embedded <see cref="IDebugServer"/>.</summary>
@@ -13,12 +11,6 @@ public sealed class DebugServerOptions
 
 	/// <summary>URL shown in the target list and Page frame tree.</summary>
 	public string TargetUrl { get; set; } = "app://main-window";
-
-	/// <summary>
-	/// Optional callback invoked on demand when a connected inspector opens the Memory panel.
-	/// Return <see langword="null"/> to omit memory data.
-	/// </summary>
-	public Func<MemoryStats>? MemoryProvider { get; set; }
 
 	// --- CdpServerOptions pass-through ---
 	public string BrowserName { get; set; } = "Chrome/124.0.6367.207";

@@ -1,9 +1,5 @@
 using Enyim.Iris.Server.AspNetCore;
-using Enyim.Iris.Server.Inspection;
-using Enyim.Iris.Server.Sessions;
 using Enyim.Iris.Server.Targets;
-
-using Enyim.Iris.Protocol;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,30 +9,30 @@ namespace Enyim.Iris.Server.Hosting;
 
 /// <summary>
 /// Factory and implementation for an embedded debug server. The server owns an internal Kestrel
-/// listener on a loopback port and exposes a push API that the host app uses to surface its
-/// control tree and log stream to connected DevTools inspectors.
+/// listener on a loopback port. Use <see cref="Create"/> to configure it, then call
+/// <see cref="StartAsync"/> to begin listening.
 /// </summary>
 public sealed class DebugServer : IDebugServer
 {
 	private readonly WebApplication _app;
-	private readonly IInspectionSnapshotStore _store;
-	private readonly ICdpSessionHub _hub;
-	private readonly DebugNodeMapper _mapper;
 
 	private DebugServer(WebApplication app, DebugServerOptions options)
 	{
 		_app = app;
-		_store = app.Services.GetRequiredService<IInspectionSnapshotStore>();
-		_hub = app.Services.GetRequiredService<ICdpSessionHub>();
-		_mapper = app.Services.GetRequiredService<DebugNodeMapper>();
 		InspectUrl = new Uri($"http://127.0.0.1:{options.Port}/json/list");
 	}
 
 	/// <inheritdoc/>
 	public Uri InspectUrl { get; }
 
+	/// <inheritdoc/>
+	public IServiceProvider Services => _app.Services;
+
 	/// <summary>Creates and configures an embedded debug server. Call <see cref="StartAsync"/> to begin listening.</summary>
-	public static IDebugServer Create(Action<DebugServerOptions> configure)
+	/// <param name="configure">Options for the server (port, target info, browser identity).</param>
+	/// <param name="configureCdp">Optional callback to register CDP command handlers on the builder.</param>
+	public static IDebugServer Create(Action<DebugServerOptions> configure,
+	                                  Action<ICdpServerBuilder>? configureCdp = null)
 	{
 		var options = new DebugServerOptions();
 		configure(options);
@@ -47,33 +43,22 @@ public sealed class DebugServer : IDebugServer
 		});
 		// Configure the loopback-only listener via IConfiguration (works with slim builder).
 		builder.Configuration["Kestrel:Endpoints:Http:Url"] = $"http://127.0.0.1:{options.Port}";
-		builder.Services
-			.AddCdpServer(o =>
-			{
-				o.BrowserName = options.BrowserName;
-				o.ProtocolVersion = options.ProtocolVersion;
-				o.UserAgent = options.UserAgent;
-			})
-			.AddInspectionDomains(options.TargetUrl, options.TargetTitle);
 
-		if (options.MemoryProvider is not null)
-			builder.Services.AddSingleton(options.MemoryProvider);
+		var cdpBuilder = builder.Services.AddCdpServer(o =>
+		{
+			o.BrowserName = options.BrowserName;
+			o.ProtocolVersion = options.ProtocolVersion;
+			o.UserAgent = options.UserAgent;
+		});
 
-		//// PostConfigure runs after AddConfiguration (which fires at Build time and can
-		//// override SetMinimumLevel). Clearing rules removes any category/provider filters
-		//// that would shadow the global floor.
-		//builder.Services.PostConfigure<LoggerFilterOptions>(opts =>
-		//{
-		//	opts.MinLevel = LogLevel.Trace;
-		//	opts.Rules.Clear();
-		//});
+		configureCdp?.Invoke(cdpBuilder);
 
 		var app = builder.Build();
 
 		var registry = app.Services.GetRequiredService<ICdpTargetRegistry>();
 		registry.Add(new CdpTarget
 		{
-			Id = "95b6f5dc-ce10-412a-82ea-a18d9a1dcb94", //Guid.NewGuid().ToString("N").ToUpperInvariant(),
+			Id = "95b6f5dc-ce10-412a-82ea-a18d9a1dcb94",
 			Type = "page",
 			Title = options.TargetTitle,
 			Url = options.TargetUrl,
@@ -106,19 +91,6 @@ public sealed class DebugServer : IDebugServer
 
 	/// <inheritdoc/>
 	public Task StopAsync(CancellationToken ct = default) => _app.StopAsync(ct);
-
-	/// <inheritdoc/>
-	public void PublishTree(DebugNode root)
-	{
-		_store.SetTree(root);
-		_hub.BroadcastAsync(new DOM.DocumentUpdated());
-	}
-
-	/// <inheritdoc/>
-	public void Log(DebugLogEntry entry)
-	{
-		_hub.BroadcastAsync(_mapper.MapLogEntry(entry));
-	}
 
 	/// <inheritdoc/>
 	public async ValueTask DisposeAsync()

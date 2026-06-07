@@ -1,23 +1,26 @@
-using System.Runtime.CompilerServices;
-
+using Enyim.Iris.Server;
 using Enyim.Iris.Server.Hosting;
-using Enyim.Iris.Server.Inspection;
 
-var debug = DebugServer.Create(o =>
-{
-	o.Port = 9333;
-	o.TargetTitle = "Browser Emulator Sample";
-	o.TargetUrl = "https://example.com/";
-	o.BrowserName = "Chrome/124.0.6367.207";
-	o.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-				   + "(KHTML, like Gecko) Chrome/124.0.6367.207 Safari/537.36";
+using Sample;
+using Sample.Inspection;
 
-	o.MemoryProvider = static () => new MemoryStats(
-		GC.GetTotalMemory(false),
-		GC.CollectionCount(0),
-		GC.CollectionCount(1),
-		GC.CollectionCount(2));
-});
+const string targetUrl = "https://example.com/";
+const string targetTitle = "Browser Emulator Sample";
+
+var debug = DebugServer.Create(
+	o =>
+	{
+		o.Port = 9333;
+		o.TargetTitle = targetTitle;
+		o.TargetUrl = targetUrl;
+		o.BrowserName = "Chrome/124.0.6367.207";
+		o.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+		               + "(KHTML, like Gecko) Chrome/124.0.6367.207 Safari/537.36";
+	},
+	cdp => cdp
+		.AddInspectionTarget(targetUrl, targetTitle)
+		.AddDefaultHandlers()
+		.AddDebugNodeHandlers());
 
 await debug.StartAsync();
 

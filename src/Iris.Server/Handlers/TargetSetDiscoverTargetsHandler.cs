@@ -1,0 +1,11 @@
+using Enyim.Iris.Protocol;
+
+using Enyim.Iris.Server.Dispatch;
+
+namespace Enyim.Iris.Server.Handlers;
+
+internal sealed class TargetSetDiscoverTargetsHandler : ICdpCommandHandler<Target.SetDiscoverTargetsRequest, Target.SetDiscoverTargetsRequestResult>
+{
+	public ValueTask<Target.SetDiscoverTargetsRequestResult> HandleAsync(Target.SetDiscoverTargetsRequest parameters, CdpCommandContext context) =>
+		new(new Target.SetDiscoverTargetsRequestResult());
+}

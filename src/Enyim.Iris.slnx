@@ -5,6 +5,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="../tests/Iris.Server.Tests/Iris.Server.Tests.csproj" />
+    <Project Path="../tests/Sample.Tests/Sample.Tests.csproj" />
   </Folder>
   <Project Path="Iris.Protocol/Iris.Protocol.csproj" />
   <Project Path="Iris.Server.AspNetCore/Iris.Server.AspNetCore.csproj" />
