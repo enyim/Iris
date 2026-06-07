@@ -34,6 +34,9 @@ public static class CdpServerServiceCollectionExtensions
 		services.TryAddSingleton<ICdpSessionHub, CdpSessionHub>();
 		services.TryAddSingleton<CdpSessionFactory>();
 
+		services.AddControllers()
+			.AddApplicationPart(typeof(CdpDiscoveryController).Assembly);
+
 		return new CdpServerBuilder(services, registry, index);
 	}
 }

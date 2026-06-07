@@ -1,0 +1,25 @@
+using System.Text.Json.Serialization;
+
+namespace Enyim.Iris.Server.AspNetCore;
+
+/// <summary>Response body for <c>GET /json/version</c>.</summary>
+public sealed record CdpVersionInfo
+{
+	[JsonPropertyName("Browser")]
+	public required string Browser { get; init; }
+
+	[JsonPropertyName("Protocol-Version")]
+	public required string ProtocolVersion { get; init; }
+
+	[JsonPropertyName("User-Agent")]
+	public required string UserAgent { get; init; }
+
+	[JsonPropertyName("V8-Version")]
+	public required string V8Version { get; init; }
+
+	[JsonPropertyName("WebKit-Version")]
+	public required string WebKitVersion { get; init; }
+
+	[JsonPropertyName("webSocketDebuggerUrl")]
+	public required string WebSocketDebuggerUrl { get; init; }
+}
