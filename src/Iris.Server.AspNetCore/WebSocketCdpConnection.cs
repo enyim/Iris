@@ -8,20 +8,20 @@ using Microsoft.Extensions.Logging;
 namespace Enyim.Iris.Server.AspNetCore;
 
 /// <summary>Adapts a <see cref="WebSocket"/> to <see cref="ICdpConnection"/>, assembling fragmented text frames.</summary>
-internal sealed class WebSocketCdpConnection(WebSocket socket, ILogger<WebSocketCdpConnection> logger) : ICdpConnection
+public sealed class WebSocketCdpConnection(WebSocket socket, ILogger<WebSocketCdpConnection> logger) : ICdpConnection
 {
-	private readonly ArrayBufferWriter<byte> _receiveBuffer = new(initialCapacity: 8192);
+	private readonly ArrayBufferWriter<byte> receiveBuffer = new(initialCapacity: 8192);
 
 	public async ValueTask<CdpReceiveResult> ReceiveAsync(CancellationToken cancellationToken)
 	{
-		_receiveBuffer.ResetWrittenCount();
+		receiveBuffer.ResetWrittenCount();
 
 		while (true)
 		{
 			ValueWebSocketReceiveResult result;
 			try
 			{
-				result = await socket.ReceiveAsync(_receiveBuffer.GetMemory(8192), cancellationToken)
+				result = await socket.ReceiveAsync(receiveBuffer.GetMemory(8192), cancellationToken)
 					.ConfigureAwait(false);
 			}
 			catch (WebSocketException)
@@ -32,10 +32,10 @@ internal sealed class WebSocketCdpConnection(WebSocket socket, ILogger<WebSocket
 			if (result.MessageType == WebSocketMessageType.Close)
 				return CdpReceiveResult.Closed;
 
-			_receiveBuffer.Advance(result.Count);
+			receiveBuffer.Advance(result.Count);
 
 			if (result.EndOfMessage)
-				return CdpReceiveResult.Message(_receiveBuffer.WrittenMemory);
+				return CdpReceiveResult.Message(receiveBuffer.WrittenMemory);
 		}
 	}
 

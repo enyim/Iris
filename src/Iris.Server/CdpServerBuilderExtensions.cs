@@ -1,4 +1,5 @@
 using Enyim.Iris.Server.Handlers;
+using Enyim.Iris.Server.Targets;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,14 +35,29 @@ public static class CdpServerBuilderExtensions
 		return cdp;
 	}
 
-	/// <summary></summary>
+	/// <summary>Registers a pre-built <see cref="CdpTarget"/> with the server.</summary>
 	/// <param name="cdp">The server builder returned by <c>AddCdpServer()</c>.</param>
-	/// <param name="targetUrl">The URL shown in the target list and Page frame tree.</param>
-	/// <param name="targetTitle">The title shown in the target list and navigation history.</param>
-	public static ICdpServerBuilder AddInspectionTarget(this ICdpServerBuilder cdp, string targetUrl = "app://main-window", string targetTitle = "Debug Target")
+	/// <param name="target">The target to register.</param>
+	public static ICdpServerBuilder AddTarget(this ICdpServerBuilder cdp, CdpTarget target)
 	{
-		cdp.Services.AddSingleton(new InspectionTargetOptions { Url = targetUrl, Title = targetTitle });
-
+		cdp.Services.AddSingleton(target);
 		return cdp;
 	}
+
+	///// <summary></summary>
+	///// <param name="cdp">The server builder returned by <c>AddCdpServer()</c>.</param>
+	///// <param name="targetUrl">The URL shown in the target list and Page frame tree.</param>
+	///// <param name="targetTitle">The title shown in the target list and navigation history.</param>
+	//public static ICdpServerBuilder AddInspectionTarget(this ICdpServerBuilder cdp, string targetUrl = "app://main-window", string targetTitle = "Debug Target")
+	//{
+	//	//cdp.Services.AddSingleton(new InspectionTargetOptions { Url = targetUrl, Title = targetTitle });
+
+	//	return cdp.AddTarget(new CdpTarget
+	//	{
+	//		Id = Guid.NewGuid().ToString("D"),
+	//		Type = "page",
+	//		Title = targetTitle,
+	//		Url = targetUrl,
+	//	});
+	//}
 }

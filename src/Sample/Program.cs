@@ -1,5 +1,6 @@
 using Enyim.Iris.Server;
 using Enyim.Iris.Server.Hosting;
+using Enyim.Iris.Server.Targets;
 
 using Sample;
 using Sample.Inspection;
@@ -11,14 +12,18 @@ var debug = DebugServer.Create(
 	o =>
 	{
 		o.Port = 9333;
-		o.TargetTitle = targetTitle;
-		o.TargetUrl = targetUrl;
 		o.BrowserName = "Chrome/124.0.6367.207";
 		o.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-		               + "(KHTML, like Gecko) Chrome/124.0.6367.207 Safari/537.36";
+					   + "(KHTML, like Gecko) Chrome/124.0.6367.207 Safari/537.36";
 	},
 	cdp => cdp
-		.AddInspectionTarget(targetUrl, targetTitle)
+		.AddTarget(new CdpTarget
+		{
+			Id = Guid.NewGuid().ToString("D"),
+			Type = "page",
+			Title = targetTitle,
+			Url = targetUrl,
+		})
 		.AddDefaultHandlers()
 		.AddDebugNodeHandlers());
 
@@ -41,7 +46,6 @@ debug.PublishTree(new DebugNode(
 			]),
 		]),
 	]));
-
 
 Console.WriteLine($"DebugServer running. Open edge://inspect or chrome://inspect.");
 Console.WriteLine($"Or navigate to: {debug.InspectUrl}");

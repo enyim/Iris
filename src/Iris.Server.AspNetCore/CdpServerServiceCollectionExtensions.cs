@@ -1,3 +1,5 @@
+using System.Net.WebSockets;
+
 using Enyim.Iris.Server.Contracts;
 using Enyim.Iris.Server.Dispatch;
 using Enyim.Iris.Server.Sessions;
@@ -15,9 +17,7 @@ public static class CdpServerServiceCollectionExtensions
 	/// Registers the CDP server services and returns a builder for mapping command handlers.
 	/// The host must also call <c>app.UseWebSockets()</c> and <c>app.MapCdpServer()</c>.
 	/// </summary>
-	public static ICdpServerBuilder AddCdpServer(
-		this IServiceCollection services,
-		Action<CdpServerOptions>? configureOptions = null)
+	public static ICdpServerBuilder AddCdpServer(this IServiceCollection services, Action<CdpServerOptions>? configureOptions = null)
 	{
 		services.AddOptions<CdpServerOptions>();
 		if (configureOptions is not null)
@@ -34,8 +34,9 @@ public static class CdpServerServiceCollectionExtensions
 		services.TryAddSingleton<ICdpSessionHub, CdpSessionHub>();
 		services.TryAddSingleton<CdpSessionFactory>();
 
-		services.AddControllers()
-			.AddApplicationPart(typeof(CdpDiscoveryController).Assembly);
+		services.AddSingleton<Func<WebSocket, WebSocketCdpConnection>>(sp => socket => ActivatorUtilities.CreateInstance<WebSocketCdpConnection>(sp, socket));
+
+		services.AddControllers().AddApplicationPart(typeof(CdpDiscoveryController).Assembly);
 
 		return new CdpServerBuilder(services, registry, index);
 	}

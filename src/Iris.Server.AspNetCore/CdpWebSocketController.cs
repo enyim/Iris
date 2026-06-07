@@ -1,17 +1,15 @@
+using System.Net.WebSockets;
+
 using Enyim.Iris.Server.Sessions;
 using Enyim.Iris.Server.Targets;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Enyim.Iris.Server.AspNetCore;
 
 [ApiController]
-public sealed class CdpWebSocketController(
-	ICdpTargetRegistry registry,
-	ILogger<CdpWebSocketController> logger) : ControllerBase
+public sealed class CdpWebSocketController(ICdpTargetRegistry registry, CdpSessionFactory sessionFactory, Func<WebSocket, WebSocketCdpConnection> connectionFactory) : ControllerBase
 {
 	[HttpGet("/devtools/page/{id}")]
 	public async Task PageWebSocket(string id)
@@ -22,15 +20,6 @@ public sealed class CdpWebSocketController(
 			return;
 		}
 
-		await RunSessionAsync($"page:{id}");
-	}
-
-	//[HttpGet("/devtools/browser/{id}")]
-	//public async Task BrowserWebSocket(string id) =>
-	//	await RunSessionAsync($"browser:{id}");
-
-	private async Task RunSessionAsync(string connectionId)
-	{
 		if (!HttpContext.WebSockets.IsWebSocketRequest)
 		{
 			HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
@@ -38,10 +27,14 @@ public sealed class CdpWebSocketController(
 		}
 
 		using var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-		var factory = HttpContext.RequestServices.GetRequiredService<CdpSessionFactory>();
-		var connection = new WebSocketCdpConnection(socket, logger);
 
-		await using var session = factory.Create(connection, connectionId);
+		var connection = connectionFactory(socket);
+
+		await using var session = sessionFactory.Create(connection, $"page:{id}");
 		await session.RunAsync(HttpContext.RequestAborted);
 	}
+
+	//[HttpGet("/devtools/browser/{id}")]
+	//public async Task BrowserWebSocket(string id) =>
+	//	await RunSessionAsync($"browser:{id}");
 }

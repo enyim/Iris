@@ -9,11 +9,11 @@ namespace Enyim.Iris.Server.Sessions;
 /// </summary>
 public sealed class CdpDomainState
 {
-	private readonly ConcurrentDictionary<string, bool> _enabled = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, bool> enabled = new(StringComparer.Ordinal);
 
-	public void Enable(string domain) => _enabled[domain] = true;
+	public void Enable(string domain) => enabled[domain] = true;
 
-	public void Disable(string domain) => _enabled[domain] = false;
+	public void Disable(string domain) => enabled[domain] = false;
 
-	public bool IsEnabled(string domain) => _enabled.TryGetValue(domain, out var enabled) && enabled;
+	public bool IsEnabled(string domain) => enabled.TryGetValue(domain, out var result) && result;
 }

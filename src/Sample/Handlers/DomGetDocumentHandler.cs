@@ -6,7 +6,7 @@ using Sample.Inspection;
 
 namespace Sample;
 
-internal sealed class DomGetDocumentHandler(InspectionTargetOptions opts, IInspectionSnapshotStore store, DebugNodeMapper mapper)
+internal sealed class DomGetDocumentHandler(IInspectionSnapshotStore store, DebugNodeMapper mapper)
 	: ICdpCommandHandler<DOM.GetDocumentRequest, DOM.GetDocumentRequestResult>
 {
 	public ValueTask<DOM.GetDocumentRequestResult> HandleAsync(DOM.GetDocumentRequest parameters, CdpCommandContext context)
@@ -14,7 +14,9 @@ internal sealed class DomGetDocumentHandler(InspectionTargetOptions opts, IInspe
 		var tree = store.CurrentTree;
 
 		if (tree is null)
-			return new(new DOM.GetDocumentRequestResult(EmptyDocument(opts.Url)));
+		{
+			return new(new DOM.GetDocumentRequestResult(EmptyDocument("about:blank")));
+		}
 
 		return new(new DOM.GetDocumentRequestResult(mapper.MapTree(tree)));
 	}
@@ -27,7 +29,8 @@ internal sealed class DomGetDocumentHandler(InspectionTargetOptions opts, IInspe
 			NodeName: "#document",
 			LocalName: "",
 			NodeValue: "",
+			ChildNodeCount: 0,
 			DocumentURL: url,
-			BaseURL: url,
-			ChildNodeCount: 0);
+			BaseURL: url
+		);
 }

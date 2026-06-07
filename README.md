@@ -5,18 +5,23 @@ in .NET 10 / C# latest. It provides the plumbing — transport, JSON-RPC dispatc
 target discovery — that a CDP client (DevTools, Puppeteer, Playwright, `chrome-remote-interface`,
 the `ChromeProtocol` client library) connects to. Domain *behavior* is left to handlers you supply.
 
-Strongly-typed contracts (615 commands, 198 events) are **reused** from
+Strongly-typed contracts (commands, events, types for all CDP domains) live in `Iris.Protocol`,
+generated from the Chrome DevTools Protocol schema. Base types (`ICommand<TResult>`, `IType`,
+`[MethodName]`, etc.) come from
 [`seclerp/dotnet-chrome-protocol`](https://github.com/seclerp/dotnet-chrome-protocol)
-(`ChromeProtocol.Domains` + `ChromeProtocol.Core`); only the server half is implemented here.
+(`ChromeProtocol.Core`); only the server half is implemented here.
 
 ## Projects
 
 | Project | Role |
 | --- | --- |
-| `src/Cdp.Server` | Core framework: wire protocol, dispatch, sessions, events, targets, transport abstraction. No ASP.NET dependency. |
-| `src/Cdp.Server.AspNetCore` | Kestrel hosting: `AddCdpServer()`, `MapCdpServer()`, the `/json/*` discovery endpoints, and the WebSocket transport adapter. |
-| `samples/Cdp.Sample.BrowserEmulator` | A runnable host with stub handlers a real CDP client can connect to. |
-| `tests/Cdp.Server.Tests` | Unit tests + an in-memory WebSocket integration test. |
+| `src/Iris.Protocol` | Auto-generated CDP contracts (commands, events, types) for all domains; depends only on `ChromeProtocol.Core`. |
+| `src/Iris.Server` | Core framework: wire protocol, dispatch, sessions, events, targets, transport abstraction. No ASP.NET dependency. |
+| `src/Iris.Server.AspNetCore` | Kestrel hosting: `AddCdpServer()`, `MapCdpServer()`, the `/json/*` discovery endpoints, and the WebSocket transport adapter. |
+| `src/Iris.Server.Hosting` | Embedded server: `DebugServer.Create(...)` factory that owns an internal Kestrel listener on a loopback port. |
+| `src/Sample` | A runnable host demonstrating `DebugServer` with stub handlers a real CDP client can connect to. |
+| `tests/Iris.Server.Tests` | Unit tests + in-memory WebSocket integration tests. |
+| `tests/Sample.Tests` | Integration tests for the Sample project. |
 
 ## How it works
 
@@ -28,7 +33,7 @@ WebSocket ─▶ WebSocketCdpConnection ─▶ CdpSession ─▶ CdpDispatcher �
                                        ICdpConnection.SendAsync
 ```
 
-- **Contracts.** `CdpContractIndex` reflects `ChromeProtocol.Domains`: commands carry
+- **Contracts.** `CdpContractIndex` reflects `Iris.Protocol`: commands carry
   `[MethodName("Domain.command")]` and implement `ICommand<TResult>`, so the method name and result
   type are discovered without instantiation. The records already have camelCase `[JsonPropertyName]`,
   so `System.Text.Json` (de)serializes them as-is.
@@ -53,7 +58,7 @@ dotnet build src/Enyim.Iris.slnx
 ## Run the sample
 
 ```pwsh
-dotnet run --project samples/Cdp.Sample.BrowserEmulator
+dotnet run --project src/Sample
 # then browse the discovery endpoints:
 #   GET /json/version
 #   GET /json/list      -> a page target with a webSocketDebuggerUrl

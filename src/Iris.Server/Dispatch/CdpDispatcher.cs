@@ -7,17 +7,11 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Enyim.Iris.Server.Dispatch;
 
-/// <summary>Routes an incoming command to its registered handler and normalizes failures into CDP errors.</summary>
-public interface ICdpDispatcher
-{
-	ValueTask<CdpResult> DispatchAsync(CdpCommandContext context);
-}
-
 /// <inheritdoc/>
 public sealed class CdpDispatcher(ICdpCommandRegistry registry, ILogger<CdpDispatcher>? logger = null)
 	: ICdpDispatcher
 {
-	private readonly ILogger _logger = logger ?? NullLogger<CdpDispatcher>.Instance;
+	private readonly ILogger logger = logger ?? NullLogger<CdpDispatcher>.Instance;
 
 	public async ValueTask<CdpResult> DispatchAsync(CdpCommandContext context)
 	{
@@ -46,7 +40,7 @@ public sealed class CdpDispatcher(ICdpCommandRegistry registry, ILogger<CdpDispa
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Unhandled exception dispatching CDP method {Method}", context.Method);
+			logger.LogError(ex, "Unhandled exception dispatching CDP method {Method}", context.Method);
 			return CdpResult.Fail(CdpError.ServerError(ex.Message));
 		}
 	}

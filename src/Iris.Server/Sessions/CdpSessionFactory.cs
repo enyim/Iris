@@ -15,8 +15,8 @@ public sealed class CdpSessionFactory(
 	ILoggerFactory loggerFactory,
 	ICdpSessionHub hub)
 {
-	private readonly ILogger<CdpSession> _logger = loggerFactory.CreateLogger<CdpSession>();
+	private readonly ILogger<CdpSession> logger = loggerFactory.CreateLogger<CdpSession>();
 
 	public CdpSession Create(ICdpConnection connection, string connectionId, string? sessionId = null) =>
-		new(connection, dispatcher, index, scopeFactory, _logger, connectionId, sessionId, hub: hub);
+		new(connection, dispatcher, index, scopeFactory, logger, connectionId, sessionId, hub: hub);
 }

@@ -18,14 +18,14 @@ public sealed class IntegrationTests : IAsyncLifetime
 	private static readonly Uri BaseHttp = new($"http://127.0.0.1:{TestPort}");
 	private static readonly Uri BaseWs = new($"ws://127.0.0.1:{TestPort}");
 
-	private IDebugServer _debug = null!;
-	private HttpClient _http = null!;
+	private IDebugServer debug = null!;
+	private HttpClient http = null!;
 
 	private static CancellationToken Timeout => new CancellationTokenSource(TimeSpan.FromSeconds(15)).Token;
 
 	public async ValueTask InitializeAsync()
 	{
-		_debug = DebugServer.Create(
+		debug = DebugServer.Create(
 			o =>
 			{
 				o.Port = TestPort;
@@ -34,25 +34,31 @@ public sealed class IntegrationTests : IAsyncLifetime
 				o.BrowserName = "Chrome/124.0.6367.207";
 			},
 			cdp => cdp
-				.AddInspectionTarget("https://example.com/", "Test Target")
+				.AddTarget(new Targets.CdpTarget
+				{
+					Id = "1",
+					Url = "https://example.com/",
+					Title = "Test Target",
+					Type = "page"
+				})
 				.AddDefaultHandlers()
 		);
 
-		await _debug.StartAsync();
-		_http = new HttpClient { BaseAddress = BaseHttp };
+		await debug.StartAsync();
+		http = new HttpClient { BaseAddress = BaseHttp };
 	}
 
 	public async ValueTask DisposeAsync()
 	{
-		_http.Dispose();
-		await _debug.StopAsync();
-		await _debug.DisposeAsync();
+		http.Dispose();
+		await debug.StopAsync();
+		await debug.DisposeAsync();
 	}
 
 	[Fact]
 	public async Task Json_list_advertises_a_page_target()
 	{
-		using var doc = JsonDocument.Parse(await _http.GetStringAsync("/json/list", Timeout));
+		using var doc = JsonDocument.Parse(await http.GetStringAsync("/json/list", Timeout));
 		var target = Assert.Single(doc.RootElement.EnumerateArray().ToArray());
 		Assert.Equal("page", target.GetProperty("type").GetString());
 		Assert.StartsWith("ws", target.GetProperty("webSocketDebuggerUrl").GetString());
@@ -61,7 +67,7 @@ public sealed class IntegrationTests : IAsyncLifetime
 	[Fact]
 	public async Task Json_version_reports_browser_and_ws_url()
 	{
-		using var doc = JsonDocument.Parse(await _http.GetStringAsync("/json/version", Timeout));
+		using var doc = JsonDocument.Parse(await http.GetStringAsync("/json/version", Timeout));
 		Assert.Equal("Chrome/124.0.6367.207", doc.RootElement.GetProperty("Browser").GetString());
 		Assert.Contains("/devtools/browser/", doc.RootElement.GetProperty("webSocketDebuggerUrl").GetString());
 	}
@@ -108,12 +114,13 @@ public sealed class IntegrationTests : IAsyncLifetime
 				sawResponse = true;
 			}
 		}
+
 		Assert.True(sawEvent, "Expected Runtime.executionContextCreated after Runtime.enable");
 	}
 
 	private async Task<WebSocket> ConnectToPageAsync()
 	{
-		using var doc = JsonDocument.Parse(await _http.GetStringAsync("/json/list", Timeout));
+		using var doc = JsonDocument.Parse(await http.GetStringAsync("/json/list", Timeout));
 		var id = doc.RootElement.EnumerateArray().First().GetProperty("id").GetString()!;
 		var uri = new Uri(BaseWs, $"/devtools/page/{id}");
 		var ws = new ClientWebSocket();
@@ -134,6 +141,7 @@ public sealed class IntegrationTests : IAsyncLifetime
 			buffer.Advance(result.Count);
 			if (result.EndOfMessage) break;
 		}
+
 		return JsonDocument.Parse(buffer.WrittenMemory);
 	}
 }

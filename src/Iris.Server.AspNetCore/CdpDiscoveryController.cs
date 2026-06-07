@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
 
 using Enyim.Iris.Server.Protocol;
@@ -24,13 +25,6 @@ public sealed class CdpDiscoveryController(
 			.ToArray());
 	}
 
-	[HttpGet, HttpPut, Route("/json/new")]
-	public IActionResult NewTarget(string url = "about:blank")
-	{
-		var target = registry.CreatePage(url);
-		return CdpContent(DescribeTarget(target, options.Value, WsBase()));
-	}
-
 	[HttpGet("/json/version")]
 	public IActionResult GetVersion()
 	{
@@ -46,17 +40,13 @@ public sealed class CdpDiscoveryController(
 		});
 	}
 
+	// TODO bridge these back into the observed app so they can act on it
+
 	[HttpGet("/json/activate/{id}")]
-	public IActionResult ActivateTarget(string id) =>
-		registry.TryGet(id, out _)
-			? Ok("Target activated")
-			: NotFound($"No such target id: {id}");
+	public IActionResult ActivateTarget(string id) => registry.TryGet(id, out _) ? Ok("Target activated") : NotFound($"No such target id: {id}");
 
 	[HttpGet("/json/close/{id}")]
-	public IActionResult CloseTarget(string id) =>
-		registry.Remove(id)
-			? Ok("Target is closing")
-			: NotFound($"No such target id: {id}");
+	public IActionResult CloseTarget(string id) => NotFound($"target {id} cannot be closed");
 
 	private static CdpTargetInfo DescribeTarget(CdpTarget target, CdpServerOptions opts, string wsBase)
 	{

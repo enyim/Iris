@@ -6,25 +6,25 @@ namespace Enyim.Iris.Server.Tests;
 
 public class ContractIndexTests
 {
-	private readonly CdpContractIndex _index = CdpContractIndex.Default;
+	private readonly CdpContractIndex index = CdpContractIndex.Default;
 
 	[Fact]
 	public void Maps_command_type_to_method_name()
 	{
-		Assert.Equal("Browser.getVersion", _index.GetMethodName(typeof(Browser.GetVersionRequest)));
+		Assert.Equal("Browser.getVersion", index.GetMethodName(typeof(Browser.GetVersionRequest)));
 	}
 
 	[Fact]
 	public void Maps_event_type_to_method_name()
 	{
 		Assert.Equal("Runtime.executionContextCreated",
-			_index.GetMethodName(typeof(Runtime.ExecutionContextCreated)));
+			index.GetMethodName(typeof(Runtime.ExecutionContextCreated)));
 	}
 
 	[Fact]
 	public void Resolves_command_descriptor_with_result_type()
 	{
-		Assert.True(_index.TryGetCommand("Browser.getVersion", out var descriptor));
+		Assert.True(index.TryGetCommand("Browser.getVersion", out var descriptor));
 		Assert.Equal(typeof(Browser.GetVersionRequest), descriptor.ParamsType);
 		Assert.Equal(typeof(Browser.GetVersionRequestResult), descriptor.ResultType);
 	}
@@ -32,10 +32,10 @@ public class ContractIndexTests
 	[Fact]
 	public void Domains_with_enable_command_are_gated()
 	{
-		Assert.True(_index.IsGatedDomain("Runtime"));
-		Assert.True(_index.IsGatedDomain("Page"));
+		Assert.True(index.IsGatedDomain("Runtime"));
+		Assert.True(index.IsGatedDomain("Page"));
 		// Target has no enable command, so its events are not gated.
-		Assert.False(_index.IsGatedDomain("Target"));
+		Assert.False(index.IsGatedDomain("Target"));
 	}
 
 	[Theory]

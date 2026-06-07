@@ -19,17 +19,17 @@ public interface IInspectionSnapshotStore
 
 public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
 {
-	private DebugNode? _tree;
+	private DebugNode? tree;
 
 	private FrozenDictionary<int, DebugNode> nodesById = new Dictionary<int, DebugNode>().ToFrozenDictionary();
 
 	public void SetTree(DebugNode root)
 	{
-		_tree = root;
+		tree = root;
 		nodesById = Flatten(root).ToFrozenDictionary();
 	}
 
-	public DebugNode? CurrentTree => _tree;
+	public DebugNode? CurrentTree => tree;
 
 	public bool TryGetNodeById(int id, out DebugNode node) => nodesById.TryGetValue(id, out node!);
 
@@ -55,5 +55,4 @@ public sealed class InspectionSnapshotStore : IInspectionSnapshotStore
 			}
 		}
 	}
-
 }

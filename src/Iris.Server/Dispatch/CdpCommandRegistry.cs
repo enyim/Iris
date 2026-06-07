@@ -9,42 +9,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Enyim.Iris.Server.Dispatch;
 
-/// <summary>Maps CDP method names to handler delegates. Populated at configuration time.</summary>
-public interface ICdpCommandRegistry
-{
-	/// <summary>Registers (or replaces) the handler for a method.</summary>
-	ICdpCommandRegistry Map(string method, CdpCommandDelegate handler);
-
-	/// <summary>
-	/// Registers a predicate-based handler invoked when <paramref name="predicate"/> returns
-	/// <see langword="true"/> for the method name. Checked in registration order, after all
-	/// exact-match handlers but before the <see cref="Fallback"/>.
-	/// </summary>
-	ICdpCommandRegistry MapWhen(Func<string, bool> predicate, CdpCommandDelegate handler);
-
-	bool TryGet(string method, out CdpCommandDelegate handler);
-
-	IReadOnlyCollection<string> Methods { get; }
-
-	/// <summary>
-	/// Optional handler invoked when no method-specific handler is registered. When null, unknown
-	/// methods return <see cref="CdpErrorCode.MethodNotFound"/>.
-	/// </summary>
-	CdpCommandDelegate? Fallback { get; set; }
-}
-
 /// <inheritdoc/>
 public sealed class CdpCommandRegistry : ICdpCommandRegistry
 {
-	private readonly Dictionary<string, CdpCommandDelegate> _handlers = new(StringComparer.Ordinal);
-	private readonly List<(Func<string, bool> Predicate, CdpCommandDelegate Handler)> _predicateHandlers = [];
+	private readonly Dictionary<string, CdpCommandDelegate> handlers = new(StringComparer.Ordinal);
+	private readonly List<(Func<string, bool> Predicate, CdpCommandDelegate Handler)> predicateHandlers = [];
 
 	public CdpCommandDelegate? Fallback { get; set; }
 
 	public ICdpCommandRegistry Map(string method, CdpCommandDelegate handler)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(method);
-		_handlers[method] = handler;
+		handlers[method] = handler;
 		return this;
 	}
 
@@ -52,16 +28,16 @@ public sealed class CdpCommandRegistry : ICdpCommandRegistry
 	{
 		ArgumentNullException.ThrowIfNull(predicate);
 		ArgumentNullException.ThrowIfNull(handler);
-		_predicateHandlers.Add((predicate, handler));
+		predicateHandlers.Add((predicate, handler));
 		return this;
 	}
 
 	public bool TryGet(string method, out CdpCommandDelegate handler)
 	{
-		if (_handlers.TryGetValue(method, out handler!))
+		if (handlers.TryGetValue(method, out handler!))
 			return true;
 
-		foreach (var (predicate, predicateHandler) in _predicateHandlers)
+		foreach (var (predicate, predicateHandler) in predicateHandlers)
 		{
 			if (predicate(method))
 			{
@@ -74,7 +50,7 @@ public sealed class CdpCommandRegistry : ICdpCommandRegistry
 		return false;
 	}
 
-	public IReadOnlyCollection<string> Methods => _handlers.Keys;
+	public IReadOnlyCollection<string> Methods => handlers.Keys;
 }
 
 /// <summary>Strongly-typed registration helpers built on the generated contracts.</summary>

@@ -36,6 +36,7 @@ public sealed class DebugNodeMapper
 				flat[i * 2 + 1] = kvp.Value;
 				i++;
 			}
+
 			attrs = flat;
 		}
 

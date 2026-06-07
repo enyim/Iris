@@ -22,28 +22,28 @@ public sealed record CdpCommandDescriptor(string Method, Type ParamsType, Type R
 /// </remarks>
 public sealed class CdpContractIndex
 {
-	private readonly FrozenDictionary<string, CdpCommandDescriptor> _commandsByMethod;
-	private readonly FrozenDictionary<Type, string> _methodByType;
-	private readonly FrozenSet<string> _gatedDomains;
+	private readonly FrozenDictionary<string, CdpCommandDescriptor> commandsByMethod;
+	private readonly FrozenDictionary<Type, string> methodByType;
+	private readonly FrozenSet<string> gatedDomains;
 
 	private CdpContractIndex(
 		FrozenDictionary<string, CdpCommandDescriptor> commandsByMethod,
 		FrozenDictionary<Type, string> methodByType,
 		FrozenSet<string> gatedDomains)
 	{
-		_commandsByMethod = commandsByMethod;
-		_methodByType = methodByType;
-		_gatedDomains = gatedDomains;
+		this.commandsByMethod = commandsByMethod;
+		this.methodByType = methodByType;
+		this.gatedDomains = gatedDomains;
 	}
 
 	/// <summary>
 	/// Domains that define an <c>enable</c> command, and therefore gate their events behind it.
 	/// Events for these domains are only delivered to connections that have enabled them.
 	/// </summary>
-	public IReadOnlySet<string> GatedDomains => _gatedDomains;
+	public IReadOnlySet<string> GatedDomains => gatedDomains;
 
 	/// <summary>True if events for <paramref name="domain"/> require the domain to be enabled.</summary>
-	public bool IsGatedDomain(string domain) => _gatedDomains.Contains(domain);
+	public bool IsGatedDomain(string domain) => gatedDomains.Contains(domain);
 
 	/// <summary>Splits a CDP method like <c>"Runtime.enable"</c> into (<c>"Runtime"</c>, <c>"enable"</c>).</summary>
 	public static (string Domain, string Command) SplitMethod(string method)
@@ -55,15 +55,15 @@ public sealed class CdpContractIndex
 	public static CdpContractIndex Default { get; } =
 		FromAssembly(typeof(Enyim.Iris.Protocol.Browser).Assembly);
 
-	public IReadOnlyCollection<CdpCommandDescriptor> Commands => _commandsByMethod.Values;
+	public IReadOnlyCollection<CdpCommandDescriptor> Commands => commandsByMethod.Values;
 
 	public bool TryGetCommand(string method, out CdpCommandDescriptor descriptor) =>
-		_commandsByMethod.TryGetValue(method, out descriptor!);
+		commandsByMethod.TryGetValue(method, out descriptor!);
 
 	/// <summary>Returns the wire method name for a generated command or event type.</summary>
 	public string GetMethodName(Type type)
 	{
-		if (_methodByType.TryGetValue(type, out var method))
+		if (methodByType.TryGetValue(type, out var method))
 			return method;
 		return ReadMethodNameAttribute(type)
 			   ?? throw new InvalidOperationException(
@@ -116,8 +116,11 @@ public sealed class CdpContractIndex
 		foreach (var iface in commandType.GetInterfaces())
 		{
 			if (iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(ICommand<>))
+			{
 				return iface.GetGenericArguments()[0];
+			}
 		}
+
 		return typeof(object);
 	}
 }
