@@ -62,8 +62,8 @@ public sealed class DebugNodeMapper
 		};
 
 		var ts = entry.Timestamp.HasValue
-			? entry.Timestamp.Value.ToUnixTimeMilliseconds() / 1000.0
-			: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0;
+			? entry.Timestamp.Value.ToUnixTimeMilliseconds()
+			: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
 		return new Log.EntryAdded(new Log.LogEntryType(
 			Source: "other",

@@ -8,7 +8,6 @@ using Enyim.Iris.Protocol;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Enyim.Iris.Server.Dispatch;
 
 namespace Enyim.Iris.Server.Hosting;
 
@@ -48,8 +47,6 @@ public sealed class DebugServer : IDebugServer
 		});
 		// Configure the loopback-only listener via IConfiguration (works with slim builder).
 		builder.Configuration["Kestrel:Endpoints:Http:Url"] = $"http://127.0.0.1:{options.Port}";
-		builder.Logging.SetMinimumLevel(LogLevel.Warning);
-
 		builder.Services
 			.AddCdpServer(o =>
 			{
@@ -62,15 +59,40 @@ public sealed class DebugServer : IDebugServer
 		if (options.MemoryProvider is not null)
 			builder.Services.AddSingleton(options.MemoryProvider);
 
+		//// PostConfigure runs after AddConfiguration (which fires at Build time and can
+		//// override SetMinimumLevel). Clearing rules removes any category/provider filters
+		//// that would shadow the global floor.
+		//builder.Services.PostConfigure<LoggerFilterOptions>(opts =>
+		//{
+		//	opts.MinLevel = LogLevel.Trace;
+		//	opts.Rules.Clear();
+		//});
+
 		var app = builder.Build();
 
 		var registry = app.Services.GetRequiredService<ICdpTargetRegistry>();
 		registry.Add(new CdpTarget
 		{
-			Id = Guid.NewGuid().ToString("N").ToUpperInvariant(),
+			Id = "95b6f5dc-ce10-412a-82ea-a18d9a1dcb94", //Guid.NewGuid().ToString("N").ToUpperInvariant(),
 			Type = "page",
 			Title = options.TargetTitle,
 			Url = options.TargetUrl,
+		});
+
+		var httpLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Iris.Http");
+		app.Use(async (ctx, next) =>
+		{
+			if (ctx.WebSockets.IsWebSocketRequest)
+			{
+				httpLogger.LogInformation("WS {Path} -> open", ctx.Request.Path);
+				await next(ctx);
+				httpLogger.LogInformation("WS {Path} -> closed", ctx.Request.Path);
+			}
+			else
+			{
+				await next(ctx);
+				httpLogger.LogInformation("{Method} {Path} -> {Status}", ctx.Request.Method, ctx.Request.Path, ctx.Response.StatusCode);
+			}
 		});
 
 		app.UseWebSockets();

@@ -39,11 +39,15 @@ debug.PublishTree(new DebugNode(
 		]),
 	]));
 
-debug.Log(new DebugLogEntry(DebugLogLevel.Info, "DebugServer started", "App"));
-debug.Log(new DebugLogEntry(DebugLogLevel.Info, $"Inspect at {debug.InspectUrl}", "App"));
 
 Console.WriteLine($"DebugServer running. Open edge://inspect or chrome://inspect.");
 Console.WriteLine($"Or navigate to: {debug.InspectUrl}");
+
+Console.WriteLine("Press Enter to log");
+Console.ReadLine();
+
+debug.Log(new DebugLogEntry(DebugLogLevel.Info, "DebugServer started", "app://debug"));
+debug.Log(new DebugLogEntry(DebugLogLevel.Warning, $"Inspect at {debug.InspectUrl}", "app://debug"));
 Console.WriteLine("Press Enter to exit...");
 Console.ReadLine();
 
